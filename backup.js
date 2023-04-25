@@ -10,8 +10,7 @@ async function main() {
         // data: new URLSearchParams(tempPostData).toString(),
         let tempPostData = {};
         let page = 1;
-
-        for (let i = 2; i < 3000; i++) {
+        for (let i = 2; i < 6; i++) {
 
             if (i == 1) {
                 page = 1;
@@ -91,10 +90,6 @@ async function main() {
                 for (let item of arrResults) {
                     await getCredential(item);
                 }
-
-                if ($("tr > td").length < 96) {
-                    break;
-                }
             }
         }
     } catch (error) {
@@ -149,7 +144,7 @@ async function getCredential(param, nTrial = 0) {
             delete result['credential_param'];
             let temp = [];
             temp.push(result);
-            new ObjectsToCsv(temp).toDisk('test.csv', { append: true });
+            new ObjectsToCsv(temp).toDisk('results.csv', { append: true });
             console.log("Export Successfully!");
         }
     } catch (error) {
