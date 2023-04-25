@@ -42,11 +42,9 @@ async function main() {
                 case 7:
                     objRow.zipcode = val;
                     if (objRow.license_status != "CLOSED") {
-                        console.log('closed');
-                        // objRow = await getCredential(objRow);
+                        console.log('unclosed');
+                        objRow = await getCredential(objRow);
                     }
-
-                    objRow = await getCredential(objRow);
                     results.push(objRow);
                     objRow = {};
                     break;
@@ -59,10 +57,8 @@ async function main() {
 
 async function getCredential(param) {
 
-    console.log(param);
     let time = Date.now();
 
-    param.crednetial_param = '196496%3B17030%3B0%3BAARON%20J%20BROWN%3B23015502%3B0';
     const response = await gotScraping.get(`https://red.prod.secure.nv.gov/Lookup/licensedetail.aspx?id=${param.crednetial_param}&_=${time}`, {
         "headers": {
             "accept": "text/html, */*; q=0.01",
@@ -79,6 +75,28 @@ async function getCredential(param) {
         },
     });
 
-    console.log(response.statusCode);
-    console.log(response.body);
+    if (response.statusCode == 200) {
+        let strBody = '<table' + response.body.split("<table")[2].split("</table>")[0] + '</table>';
+        const $ = cheerio.load(strBody);
+
+        $("tr > td").each(async(index, element) => {
+            let val = $(element).text()
+            switch (index % 6) {
+                case 0:
+                    param.credential = val;
+                    break;
+                case 2:
+                    param.issue_date = val;
+                    break;
+                case 3:
+                    param.expiration_date = val;
+                    break;
+                case 5:
+                    param.reason = val;
+                    break;
+            }
+        });
+    }
+
+    return param
 }

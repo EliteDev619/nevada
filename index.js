@@ -1,4 +1,3 @@
-const axios = require("axios");
 const { gotScraping } = require("got-scraping");
 const ObjectsToCsv = require('objects-to-csv');
 const cheerio = require('cheerio');
@@ -39,34 +38,117 @@ async function main() {
     if (response.statusCode == 200) {
         let strBody = '<table>' + response.body.split('<tbody>')[1].split('</tbody>')[0] + '</table>';
 
-        console.log(strBody);
+        const $ = cheerio.load(strBody);
+        let results = [];
+        let objRow = {};
+
+        $("tr > td").each(async(index, element) => {
+
+            let val = $(element).text()
+            switch (index % 8) {
+                case 0:
+                    let crednetial_param = $(element).children().first().attr().href.split("('")[1].split("')")[0];
+                    objRow.crednetial_param = encodeURIComponent(crednetial_param);
+                    break;
+                case 1:
+                    objRow.name = val;
+                    break;
+                case 2:
+                    objRow.license_number = val;
+                    break;
+                case 3:
+                    objRow.license_type = val;
+                    break;
+                case 4:
+                    objRow.license_status = val;
+                    break;
+                case 5:
+                    objRow.city = val;
+                    break;
+                case 6:
+                    objRow.state = val;
+                    break;
+                case 7:
+                    objRow.zipcode = val;
+                    if (objRow.license_status != "CLOSED") {
+                        console.log('unclosed');
+                        objRow = await getCredential(objRow);
+                    }
+
+                    delete objRow['crednetial_param'];
+                    results.push(objRow);
+                    objRow = {};
+                    break;
+            }
+        });
+
+        console.log(results);
+        exportData(results);
+    }
+}
+
+async function getCredential(param) {
+
+    let time = Date.now();
+    const response = await gotScraping.get(`https://red.prod.secure.nv.gov/Lookup/licensedetail.aspx?id=${param.crednetial_param}&_=${time}`, {
+        "headers": {
+            "accept": "text/html, */*; q=0.01",
+            "accept-language": "en-US,en;q=0.9",
+            "sec-ch-ua": "\"Chromium\";v=\"112\", \"Google Chrome\";v=\"112\", \"Not:A-Brand\";v=\"99\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-origin",
+            "x-requested-with": "XMLHttpRequest",
+            "Referer": "https://red.prod.secure.nv.gov/Lookup/LicenseLookup.aspx",
+            "Referrer-Policy": "strict-origin-when-cross-origin"
+        },
+    });
+
+    if (response.statusCode == 200) {
+        let strBody = '<table' + response.body.split("<table")[2].split("</table>")[0] + '</table>';
         const $ = cheerio.load(strBody);
 
-        $("tr > td").each((index, element) => {
-            console.log($(element).text());
+        $("tr > td").each(async(index, element) => {
+            let val = $(element).text()
+            switch (index % 6) {
+                case 0:
+                    param.credential = val;
+                    break;
+                case 2:
+                    param.issue_date = val;
+                    break;
+                case 3:
+                    param.expiration_date = val;
+                    break;
+                case 5:
+                    param.reason = val;
+                    break;
+            }
         });
     }
 
+    return param
 }
-
 
 function exportData(data) {
 
-    let objResult = {};
-    objResult.name = data.address ? data.address.slug : null;
-    objResult.license_number = data.address ? data.address.fullAddress : null;
-    objResult.city = data.address ? data.address.hcAddressId : null;
-    objResult.state = data.address ? data.address.streetAddress : null;
-    objResult.zip = data.address ? data.address.unit : null;
-    objResult.credential = data.address ? data.address.city : null;
-    objResult.license_type = data.address ? data.address.state : null;
-    objResult.issue_date = data.address ? data.address.zipcode : null;
-    objResult.expiration_date = data.address ? data.address.zipcodePlus4 : null;
+    // let objResult = {};
+    // objResult.name = data.address ? data.address.slug : null;
+    // objResult.license_number = data.address ? data.address.fullAddress : null;
+    // objResult.city = data.address ? data.address.hcAddressId : null;
+    // objResult.state = data.address ? data.address.streetAddress : null;
+    // objResult.zip = data.address ? data.address.unit : null;
+    // objResult.credential = data.address ? data.address.city : null;
+    // objResult.license_type = data.address ? data.address.state : null;
+    // objResult.issue_date = data.address ? data.address.zipcode : null;
+    // objResult.expiration_date = data.address ? data.address.zipcodePlus4 : null;
 
-    objResult.status = data.avm ? data.avm.priceUpper : null;
-    objResult.reason = data.avm ? data.avm.priceLower : null;
+    // objResult.status = data.avm ? data.avm.priceUpper : null;
+    // objResult.reason = data.avm ? data.avm.priceLower : null;
 
-    let temp = [];
-    temp.push(objResult);
-    new ObjectsToCsv(temp).toDisk('results.csv', { append: true });
+    // let temp = [];
+    // temp.push(objResult);
+    new ObjectsToCsv(data).toDisk('results.csv', { append: true, allColumns: true });
 }
