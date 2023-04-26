@@ -59,7 +59,7 @@ async function main() {
     console.log(results);
 }
 
-// getCredential({ credential_param: "297395%3B255199%3B0%3BAARON%20JACQUES%3B23019163%3B0" });
+getCredential({ credential_param: "290352%3B349469%3B0%3BPAUL%20R%20TIPPETS%3B23020848%3B0" });
 
 async function getCredential(param) {
 
@@ -110,7 +110,7 @@ async function getCredential(param) {
     return param
 }
 
-test();
+// test();
 
 function test() {
     let str = '48746;41520;0;BARBARA D FENSTER;;0';
