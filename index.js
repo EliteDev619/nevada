@@ -9,7 +9,7 @@ async function main() {
     try {
         // data: new URLSearchParams(tempPostData).toString(),
 
-        for (let i = 121; i < 3000; i++) {
+        for (let i = 146; i < 3000; i++) {
             let page = encodeURIComponent('Page$' + i);
             console.log(page);
 
