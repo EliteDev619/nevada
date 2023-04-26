@@ -1,29 +1,19 @@
-const ProxyList = require('free-proxy');
-const proxyList = new ProxyList();
 const { gotScraping } = require("got-scraping");
 const http2 = require("http2-wrapper");
 
 async function main() {
-    let proxyData;
-    try {
-        proxyData = await proxyList.randomByProtocol('http')
-    } catch (error) {
-        throw new Error(error);
-    }
-
-    console.log(proxyData);
 
     const agent = new http2.proxies.Http2OverHttp({
         proxyOptions: {
-            url: proxyData.url,
+            url: 'http://qyqfqdxl-rotate:a9sxtwmb6ucf@p.webshare.io:80',
         },
     });
 
     let response = await gotScraping.get('https://httpbin.org/anything', {
         http2: true,
         timeout: {
-            connect: 30000,
-            response: 30000,
+            connect: 50000,
+            response: 50000,
         },
         agent: {
             http2: agent,
