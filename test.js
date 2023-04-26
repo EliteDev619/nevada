@@ -58,7 +58,8 @@ async function main() {
 
     console.log(results);
 }
-getCredential({ credential_param: "297395%3B255199%3B0%3BAARON%20JACQUES%3B%3B0" });
+
+// getCredential({ credential_param: "297395%3B255199%3B0%3BAARON%20JACQUES%3B23019163%3B0" });
 
 async function getCredential(param) {
 
@@ -107,4 +108,15 @@ async function getCredential(param) {
     }
 
     return param
+}
+
+test();
+
+function test() {
+    let str = '48746;41520;0;BARBARA D FENSTER;;0';
+    if (str.split(';')[4] == '') {
+        str = str.replace(';;', ';23019163;');
+    }
+
+    console.log(encodeURIComponent(str));
 }
