@@ -1,3 +1,5 @@
 /node_modules
 package-lock.json
-.gitignore
+gitignore
+nevada.zip
+nevada1.zip
