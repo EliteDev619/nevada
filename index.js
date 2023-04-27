@@ -7,7 +7,7 @@ main();
 async function main() {
 
     try {
-        for (let i = 297; i < 3000; i++) {
+        for (let i = 560; i < 3000; i++) {
             let page = encodeURIComponent('Page$' + i);
             console.log(page);
 
@@ -32,6 +32,7 @@ async function main() {
                 "method": "POST"
             });
 
+            if (response.statusCode == 405) break;
             console.log(response.statusCode);
             if (response.statusCode == 200) {
                 let strBody = '<table>' + response.body.split('<tbody>')[1].split('</tbody>')[0] + '</table>';
