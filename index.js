@@ -7,7 +7,7 @@ main();
 async function main() {
 
     try {
-        for (let i = 560; i < 3000; i++) {
+        for (let i = 960; i < 40000; i++) {
             let page = encodeURIComponent('Page$' + i);
             console.log(page);
 
